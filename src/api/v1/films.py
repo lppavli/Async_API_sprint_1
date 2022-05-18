@@ -15,4 +15,13 @@ async def film_details(film_id: str, film_service: FilmService = Depends(get_fil
     if not film:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='film not found')
 
-    return Film(id=film.id, title=film.title)
+    return Film(
+        uuid=film.id,
+        title=film.title,
+        imdb_rating=film.rating,
+        description=film.description,
+        genre=film.genres,
+        actors=film.actors,
+        writers=film.writers,
+        directors=film.directors,
+    )
