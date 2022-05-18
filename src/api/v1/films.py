@@ -3,14 +3,10 @@ from http import HTTPStatus
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
+from models.data_models import Film
 from services.films import FilmService, get_film_service
 
 router = APIRouter()
-
-
-class Film(BaseModel):
-    id: str
-    title: str
 
 
 @router.get('/{film_id}', response_model=Film)
