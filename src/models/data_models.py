@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from .base import Base
 
@@ -20,17 +20,25 @@ class FilmForPerson(Base):
     type: str
 
 
-class Film(FilmForPerson):
+class Film(Base):
+    id: str
+    title: str
+    rating: float = None
+    type: str
     description: str = ""
-    genres: List[GenreForFilm] = []
-    directors = List[PersonForFilm] = []
-    writers = List[PersonForFilm] = []
-    actors = List[PersonForFilm] = []
+    genres: list[GenreForFilm] = []
+    directors: list[PersonForFilm] = []
+    writers: list[PersonForFilm] = []
+    actors: list[PersonForFilm] = []
 
 
-class Person(PersonForFilm):
-    films: List
+class Person(Base):
+    id: str
+    name: str
+    films: list[FilmForPerson]
 
 
-class Genre(GenreForFilm):
+class Genre(Base):
+    id: str
+    name: str
     description: str = ""
