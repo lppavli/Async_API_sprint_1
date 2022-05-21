@@ -40,7 +40,7 @@ class FilmService:
         return Film(**doc['_source'])
 
     async def _film_from_cache(self, film_id: str) -> Optional[Film]:
-        data = await self.redis.get(film_id)
+        data = None # await self.redis.get(film_id)
         if not data:
             return None
 
