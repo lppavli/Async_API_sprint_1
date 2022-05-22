@@ -41,4 +41,4 @@ class Person(Base):
 class Genre(Base):
     id: str
     name: str
-    description: str = ""
+    description: str = None
