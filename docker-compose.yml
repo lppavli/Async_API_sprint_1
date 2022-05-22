@@ -21,7 +21,3 @@ services:
     depends_on:
       - redis
       - elastic
-
-# Указываем Docker, какие именованные тома потребуются сервисам
-volumes:
-  static:
