@@ -51,6 +51,8 @@ class Transform:
             actors = [{'id': el['person_id'],
                        'name': el['person_name']}
                       for el in d['persons'] if el['person_role'] == 'actor']
+            genres = [{'id': el['g_id'],
+                       'name': el['g_name']} for el in d['genres']]
             res = {'id': d['id'],
                    'title': d['title'],
                    'description': d['description'],
@@ -60,7 +62,9 @@ class Transform:
                    'modified': d['modified'],
                    'directors': directors,
                    'writers': writers,
-                   'actors': actors}
+                   'actors': actors,
+                   'genres': genres
+                   }
         elif self.index == 'genres':
             res = {'id': d['genre_id'],
                    'name': d['genre_name'],
@@ -69,7 +73,7 @@ class Transform:
         elif self.index == 'persons':
             roles = ', '.join(d['roles'])
             films = [{'id': el["fw_id"],
-                      'rating': el['fw_rating'],
+                      #'rating': el['fw_rating'],
                       'title': el['fw_title'],
                       'type': 'fw_type'}
                      for el in d['films']]
@@ -86,7 +90,7 @@ class Load:
         self.data = data_from_t
         self.index = ind
         self.cursor = conn.cursor()
-        self.es = Elasticsearch(os.getenv('ES_URL', 'http://127.0.0.1:9200'))
+        self.es = Elasticsearch(os.getenv('ES_URL', 'localhost:9200'))
 
     @backoff.on_exception(
         wait_gen=backoff.expo,
@@ -107,6 +111,7 @@ def main():
         'host': os.getenv('DB_HOST', "127.0.0.1"),
         'port': os.getenv('DB_PORT', 5432),
     }
+    # queries = {'persons': PERSON_QUERY, 'movies': FW_QUERY}
     queries = {'movies': FW_QUERY, 'genres': GENRE_QUERY, 'persons': PERSON_QUERY}
     with psycopg2.connect(**dsl, cursor_factory=DictCursor) as pg_conn:
         logging.info("PostgreSQL connection is open. Start load movies data.")

@@ -16,7 +16,15 @@ FW_QUERY = '''SELECT
        ) FILTER (WHERE p.id is not null),
        '[]'
    ) as persons,
-   array_agg(DISTINCT g.name) as genres
+   COALESCE (
+       json_agg(
+           DISTINCT jsonb_build_object(
+               'g_id', g.id,
+               'g_name', g.name
+           )
+       ) FILTER (WHERE g.id is not null),
+       '[]'
+   ) as genres
 FROM content.film_work fw
 LEFT JOIN content.person_film_work pfw ON pfw.film_work_id = fw.id
 LEFT JOIN content.person p ON p.id = pfw.person_id

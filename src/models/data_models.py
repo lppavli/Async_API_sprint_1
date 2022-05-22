@@ -26,16 +26,16 @@ class Film(Base):
     rating: float = None
     type: str
     description: str = ""
-    genres: list = []
-    directors: list[PersonForFilm] = []
-    writers: list[PersonForFilm] = []
-    actors: list[PersonForFilm] = []
+    genres: List[GenreForFilm]
+    directors: List[PersonForFilm]
+    writers: List[PersonForFilm]
+    actors: List[PersonForFilm]
 
 
 class Person(Base):
     id: str
     name: str
-    films: list[FilmForPerson]
+    films: List[FilmForPerson]
 
 
 class Genre(Base):
