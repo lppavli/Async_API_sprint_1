@@ -25,7 +25,7 @@ class Film(Base):
     title: str
     rating: float = None
     type: str
-    description: str = ""
+    description: Optional[str] = ""
     genres: Optional[List[GenreForFilm]]
     directors: Optional[List[PersonForFilm]]
     writers: Optional[List[PersonForFilm]]

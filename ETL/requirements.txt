@@ -1,0 +1,6 @@
+backoff==2.0.1
+python-dotenv~=0.20.0b
+elasticsearch==6.3.1
+python-dotenv==0.20.0
+urllib3~=1.26.9
+psycopg2-binary==2.9.3
