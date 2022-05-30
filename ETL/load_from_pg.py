@@ -18,7 +18,7 @@ BATCH_SIZE = 100
 
 
 class Extraction:
-    def __init__(self, conn, query_db):
+    def __init__(self, conn, query_db) -> None:
         self.cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         self.query = query_db
 
@@ -33,7 +33,7 @@ class Extraction:
 
 
 class Transform:
-    def __init__(self, conn, ind, data_l):
+    def __init__(self, conn, ind, data_l) -> None:
         self.data = data_l
         self.index = ind
         self.cursor = conn.cursor()
@@ -73,7 +73,7 @@ class Transform:
         elif self.index == 'persons':
             roles = ', '.join(d['roles'])
             films = [{'id': el["fw_id"],
-                      #'rating': el['fw_rating'],
+                      'rating': el['fw_rating'],
                       'title': el['fw_title'],
                       'type': 'fw_type'}
                      for el in d['films']]
@@ -86,7 +86,7 @@ class Transform:
 
 
 class Load:
-    def __init__(self, conn, ind, data_from_t):
+    def __init__(self, conn, ind, data_from_t) -> None:
         self.data = data_from_t
         self.index = ind
         self.cursor = conn.cursor()
@@ -111,8 +111,7 @@ def main():
         'host': os.getenv('DB_HOST', "127.0.0.1"),
         'port': os.getenv('DB_PORT', 5432),
     }
-    # queries = {'persons': PERSON_QUERY, 'movies': FW_QUERY}
-    queries = {'movies': FW_QUERY, 'genres': GENRE_QUERY, 'persons': PERSON_QUERY}
+    queries = {'genres': GENRE_QUERY, 'persons': PERSON_QUERY, 'movies': FW_QUERY}
     with psycopg2.connect(**dsl, cursor_factory=DictCursor) as pg_conn:
         logging.info("PostgreSQL connection is open. Start load movies data.")
         while True:

@@ -26,10 +26,10 @@ class Film(Base):
     rating: float = None
     type: str
     description: str = ""
-    genres: List[GenreForFilm]
-    directors: List[PersonForFilm]
-    writers: List[PersonForFilm]
-    actors: List[PersonForFilm]
+    genres: Optional[List[GenreForFilm]]
+    directors: Optional[List[PersonForFilm]]
+    writers: Optional[List[PersonForFilm]]
+    actors: Optional[List[PersonForFilm]]
 
 
 class Person(Base):
@@ -41,4 +41,4 @@ class Person(Base):
 class Genre(Base):
     id: str
     name: str
-    description: str = None
+    description: Optional[str]
