@@ -1,25 +1,28 @@
-from fastapi import APIRouter
+from http import HTTPStatus
+
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
-# Объект router, в котором регистрируем обработчики
+from models.data_models import Film
+from services.films import FilmService, get_film_service
+
 router = APIRouter()
 
-# FastAPI в качестве моделей использует библиотеку pydantic
-# https://pydantic-docs.helpmanual.io
-# У неё есть встроенные механизмы валидации, сериализации и десериализации
-# Также она основана на дата-классах
 
-# Модель ответа API
-class Film(BaseModel):
-    id: str
-    title: str
-
-# С помощью декоратора регистрируем обработчик film_details
-# На обработку запросов по адресу <some_prefix>/some_id
-# Позже подключим роутер к корневому роутеру
-# И адрес запроса будет выглядеть так — /api/v1/film/some_id
-# В сигнатуре функции указываем тип данных, получаемый из адреса запроса (film_id: str)
-# И указываем тип возвращаемого объекта — Film
 @router.get('/{film_id}', response_model=Film)
-async def film_details(film_id: str) -> Film:
-    return Film(id='some_id', title='some_title')
+async def film_details(film_id: str, film_service: FilmService = Depends(get_film_service)) -> Film:
+    film = await film_service.get_by_id(film_id)
+    if not film:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='film not found')
+
+    return Film(
+        id=film.id,
+        title=film.title,
+        type=film.type,
+        imdb_rating=film.rating,
+        description=film.description,
+        genre=film.genres,
+        actors=film.actors,
+        writers=film.writers,
+        directors=film.directors,
+    )

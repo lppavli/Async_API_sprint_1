@@ -6,11 +6,12 @@ services:
       - "6379"
 
   elastic:
-    image: elasticsearch:7.17.0
-    expose:
-      - "9200"
+    image: elasticsearch:7.17.1
+    ports:
+      - "9200:9200"
     environment:
       - "discovery.type=single-node"
+      - "xpack.security.enabled=false"
       - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
 
   async_api:
@@ -21,3 +22,5 @@ services:
     depends_on:
       - redis
       - elastic
+
+
