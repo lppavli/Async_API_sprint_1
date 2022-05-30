@@ -90,7 +90,9 @@ class Load:
         self.data = data_from_t
         self.index = ind
         self.cursor = conn.cursor()
-        self.es = Elasticsearch(os.getenv('ES_URL', 'localhost:9200'))
+        host = os.getenv('ES_URL', 'localhost')
+        port = os.getenv('ES_PORT', '9200')
+        self.es = Elasticsearch(f'{host}:{port}')
 
     @backoff.on_exception(
         wait_gen=backoff.expo,
@@ -108,7 +110,7 @@ def main():
         'dbname': os.getenv('DB_NAME', 'movies_database'),
         'user': os.getenv('DB_USER', 'app'),
         'password': os.getenv('DB_PASSWORD', '123qwe'),
-        'host': os.getenv('DB_HOST', "127.0.0.1"),
+        'host': os.getenv('DB_HOST', "postgres"),
         'port': os.getenv('DB_PORT', 5432),
     }
     queries = {'genres': GENRE_QUERY, 'persons': PERSON_QUERY, 'movies': FW_QUERY}

@@ -2,6 +2,8 @@ version: '3'
 services:
   postgres:
     image: postgres:13
+    expose:
+      - "5432"
     ports:
       - "5432:5432"
     volumes:
@@ -15,6 +17,21 @@ services:
     image: redis:7.0-alpine
     expose:
       - "6379"
+
+  etl:
+    build:
+      context: ./ETL/
+    depends_on:
+      - elastic
+      - postgres
+    environment:
+      - "DB_PASSWORD=${DB_PASSWORD}"
+      - "DB_USER=${DB_USER}"
+      - "DB_NAME=${DB_NAME}"
+      - "DB_HOST=${DB_HOST}"
+      - "DB_PORT=${DB_PORT}"
+      - "ES_URL=${ELASTIC_HOST}"
+      - "ES_PORT=${ELASTIC_PORT}"
 
   elastic:
     image: elasticsearch:7.17.1
