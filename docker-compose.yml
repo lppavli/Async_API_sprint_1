@@ -9,9 +9,9 @@ services:
     volumes:
       - $HOME/postgresql/data:/var/lib/postgresql/data
     environment:
-      - "POSTGRES_PASSWORD=${DB_PASSWORD}"
-      - "POSTGRES_USER=${DB_USER}"
-      - "POSTGRES_DB=${DB_NAME}"
+      - "POSTGRES_PASSWORD"
+      - "POSTGRES_USER"
+      - "POSTGRES_DB"
 
   redis:
     image: redis:7.0-alpine
@@ -25,13 +25,13 @@ services:
       - elastic
       - postgres
     environment:
-      - "DB_PASSWORD=${DB_PASSWORD}"
-      - "DB_USER=${DB_USER}"
-      - "DB_NAME=${DB_NAME}"
-      - "DB_HOST=${DB_HOST}"
-      - "DB_PORT=${DB_PORT}"
-      - "ES_URL=${ELASTIC_HOST}"
-      - "ES_PORT=${ELASTIC_PORT}"
+      - "DB_PASSWORD"
+      - "DB_USER"
+      - "DB_NAME"
+      - "DB_HOST"
+      - "DB_PORT"
+      - "ELASTIC_HOST"
+      - "ELASTIC_PORT"
 
   elastic:
     image: elasticsearch:7.17.1
@@ -50,5 +50,6 @@ services:
     depends_on:
       - redis
       - elastic
+      - etl
 
 
