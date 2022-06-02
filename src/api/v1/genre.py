@@ -21,6 +21,6 @@ async def genre_details(genre_id: str, genre_service: GenreService = Depends(get
     )
 
 @router.get("/")
-async def genre_list(page_size: int, page_number: int, genre_service: GenreService = Depends(get_genre_service)):
+async def genre_list(page_size: int, page_number: int, genre_service: GenreService = Depends(get_genre_service)) -> None:
     genres = await genre_service.get_list(page_number, page_size)
     return genres
