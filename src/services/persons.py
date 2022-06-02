@@ -7,7 +7,7 @@ from fastapi import Depends
 
 from db.elastic import get_elastic
 from db.redis import get_redis
-from models.data_models import Person
+from models.data_models import Person, PersonShort
 
 PERSON_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 минут
 FILM_CACHE_EXPIRE_IN_SECONDS = 60*5
