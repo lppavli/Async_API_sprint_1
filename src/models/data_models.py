@@ -35,7 +35,7 @@ class Film(Base):
 class Person(Base):
     id: str
     name: str
-    films: List[FilmForPerson]
+    films: Optional[List[FilmForPerson]]
 
 
 class Genre(Base):

@@ -1,5 +1,5 @@
 from functools import lru_cache
-from typing import Optional
+from typing import Optional, List
 
 from aioredis import Redis
 from elasticsearch import AsyncElasticsearch, NotFoundError
@@ -26,7 +26,7 @@ class GenreService:
             await self._put_genre_to_cache(genre)
         return genre
 
-    async def get_list(self, page_number: int, page_size: int):
+    async def get_list(self, page_number: int, page_size: int) -> Optional[List[Genre]]:
         doc = await self.elastic.search(
             index="genres", from_=(page_number - 1) * page_size,
             size=page_size

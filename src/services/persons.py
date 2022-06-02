@@ -1,5 +1,5 @@
 from functools import lru_cache
-from typing import Optional
+from typing import Optional, List
 
 from aioredis import Redis
 from elasticsearch import AsyncElasticsearch, NotFoundError
@@ -10,6 +10,7 @@ from db.redis import get_redis
 from models.data_models import Person
 
 PERSON_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 минут
+FILM_CACHE_EXPIRE_IN_SECONDS = 60*5
 
 
 class PersonService:
@@ -24,10 +25,9 @@ class PersonService:
             if not person:
                 return None
             await self._put_person_to_cache(person)
+        return person
 
-        return  person
-
-    async def get_list(self, page_number: int, page_size: int):
+    async def get_list(self, page_number: int, page_size: int) -> Optional[List[Person]]:
         doc = await self.elastic.search(
             index="persons", from_=(page_number - 1) * page_size,
             size=page_size

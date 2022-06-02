@@ -110,7 +110,7 @@ def main():
         'dbname': os.getenv('DB_NAME', 'movies_database'),
         'user': os.getenv('DB_USER', 'app'),
         'password': os.getenv('DB_PASSWORD', '123qwe'),
-        'host': os.getenv('DB_HOST', "postgres"),
+        'host': os.getenv('DB_HOST', "localhost"),
         'port': os.getenv('DB_PORT', 5432),
     }
     queries = {'genres': GENRE_QUERY, 'persons': PERSON_QUERY, 'movies': FW_QUERY}
