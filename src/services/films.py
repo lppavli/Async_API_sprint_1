@@ -1,3 +1,4 @@
+import uuid
 from functools import lru_cache
 from typing import Optional
 
@@ -7,7 +8,7 @@ from fastapi import Depends
 
 from db.elastic import get_elastic
 from db.redis import get_redis
-from models.data_models import Film
+from models.data_models import Film, FilmForPerson
 
 FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 минут
 
@@ -26,6 +27,64 @@ class FilmService:
             await self._put_film_to_cache(film)
 
         return film
+
+    async def get_all_films(
+            self,
+            sort: Optional[str] = None,
+            filter: Optional[uuid.UUID] = None,
+    ) -> list[FilmForPerson]:
+
+        films = await self._get_all_films()
+
+        if sort:
+            films.sort(
+                key=lambda f: f.rating,
+                reverse=True,
+            )
+
+        films_for_person = [FilmForPerson(**f.dict()) for f in films]
+        return films_for_person
+
+    async def search(self, query: str) -> list[FilmForPerson]:
+        films = await self._search_films(query)
+
+        return films
+
+    async def _search_films(self, query: str) -> list[FilmForPerson]:
+        body = {
+            "query": {
+                "multi_match": {
+                    "query": query,
+                    "fuzziness": "auto",
+                    "fields": [
+                        "actors_names",
+                        "writers_names",
+                        "title",
+                        "description",
+                        "genre"
+                    ]
+                }
+            }
+        }
+        response = await self.elastic.search(
+            index='movies',
+            body=body,
+        )
+        return self._convert_to_model(response)
+
+    async def _get_all_films(self) -> list[FilmForPerson]:
+        response = await self.elastic.search(
+            index='movies',
+            body={'query': {'match_all': {}}},
+        )
+
+        films = self._convert_to_model(response)
+
+        return films
+
+    def _convert_to_model(self, response: dict) -> list[FilmForPerson]:
+        return [FilmForPerson(**d['_source']) for d in response['hits']['hits']]
+
 
     async def _get_film_from_elastic(self, film_id: str) -> Optional[Film]:
         try:

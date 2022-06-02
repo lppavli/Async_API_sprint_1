@@ -5,7 +5,7 @@ from core.logger import LOGGING
 
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(dotenv_path='.env.local')
 
 # Применяем настройки логирования
 logging_config.dictConfig(LOGGING)
