@@ -1,44 +1,17 @@
+import enum
 import uuid
 from http import HTTPStatus
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
 
 from models.data_models import Film, FilmForPerson
 from services.films import FilmService, get_film_service
 
-router = APIRouter()
-
-
-
 from fastapi_pagination import Page, add_pagination, paginate
-from fastapi import FastAPI
-from pydantic import BaseModel
-
-class User(BaseModel):
-    name: str
 
 
-users = [
-    User(name="Yurii"),
-    User(name="Yurii"),
-    User(name="Yurii"),
-    User(name="Yurii"),
-    User(name="Yurii"),
-    User(name="Yurii"),
-    User(name="Yurii"),
-]
-
-
-@router.get(
-    "/test-pagination",
-    response_model=Page[User],
-)
-async def route():
-    return paginate(users)
-
-add_pagination(router)
+router = APIRouter()
 
 
 @router.get(
@@ -55,8 +28,6 @@ async def films_search(
     films = await film_service.search(query)
 
     return paginate(films)
-
-
 
 
 @router.get('/{film_id}', response_model=Film)
@@ -80,15 +51,26 @@ async def film_details(
         directors=film.directors,
     )
 
+
+class SortTypes(enum.Enum):
+    rating = 'rating'
+
+    def __str__(self) -> str:
+        return self.value
+
+
 @router.get(
     '/',
     response_model=Page[FilmForPerson],
 )
 async def get_all_films(
-        sort: Optional[str] = None,
+        sort: Optional[SortTypes] = None,
         filter: Optional[uuid.UUID] = None,
         film_service: FilmService = Depends(get_film_service),
 ) -> Page[list[Film]]:
+
+    if not sort:
+        sort = ''
 
     films = await film_service.get_all_films(sort, filter)
 
