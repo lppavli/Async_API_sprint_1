@@ -31,12 +31,16 @@ class FilmService:
     async def get_all_films(
             self,
             sort: Optional[str],
-            filter: Optional[str] = None,
+            filter: Optional[str],
     ) -> list[FilmForPerson]:
 
         body = {
             "query": {
-                'match_all': {}
+                "bool": {
+                    "must": {
+                        "match_all": {}
+                    }
+                }
             }
         }
 
@@ -47,6 +51,13 @@ class FilmService:
                 },
                 "_score"
             ]
+
+        if filter:
+            body['query']['bool']['filter'] = {
+                "match": {
+                    "genres.name": f"{filter}"
+                }
+            }
 
         films = await self._search_films(body)
         return films

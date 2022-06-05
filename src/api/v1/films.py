@@ -39,24 +39,21 @@ async def film_details(
     if not film:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='film not found')
 
-    return Film(
-        id=film.id,
-        title=film.title,
-        type=film.type,
-        imdb_rating=film.rating,
-        description=film.description,
-        genre=film.genres,
-        actors=film.actors,
-        writers=film.writers,
-        directors=film.directors,
-    )
+    return film
 
 
-class SortTypes(enum.Enum):
-    rating = 'rating'
-
+class EnumStrMixin(enum.Enum):
     def __str__(self) -> str:
         return self.value
+
+
+class SortTypes(EnumStrMixin):
+    rating = 'rating'
+
+
+class FilterGenres(EnumStrMixin):
+    animation = 'Animation'
+
 
 
 @router.get(
@@ -65,12 +62,15 @@ class SortTypes(enum.Enum):
 )
 async def get_all_films(
         sort: Optional[SortTypes] = None,
-        filter: Optional[uuid.UUID] = None,
+        filter: Optional[FilterGenres] = None,
         film_service: FilmService = Depends(get_film_service),
 ) -> Page[list[Film]]:
 
     if not sort:
         sort = ''
+
+    if not filter:
+        filter = ''
 
     films = await film_service.get_all_films(sort, filter)
 
