@@ -53,7 +53,31 @@ class SortTypes(EnumStrMixin):
 
 class FilterGenres(EnumStrMixin):
     animation = 'Animation'
-
+    action = "Action"
+    adventure = "Adventure"
+    fantasy = "Fantasy"
+    sci_fi = "Sci-Fi"
+    drama = "Drama"
+    music = "Music"
+    romance = "Romance"
+    thriller = "Thriller"
+    mystery = "Mystery"
+    comedy = "Comedy"
+    family = "Family"
+    biography = "Biography"
+    musical = "Musical"
+    crime = "Crime"
+    short = "Short"
+    western = "Western"
+    documentary = "Documentary"
+    history = "History"
+    war = "War"
+    game_show = "Game-Show"
+    reality_tv = "Reality-TV"
+    horror = "Horror"
+    sport = "Sport"
+    talk_show = "Talk-Show"
+    news = "News"
 
 
 @router.get(
