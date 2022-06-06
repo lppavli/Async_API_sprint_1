@@ -20,6 +20,10 @@ class FilmForPerson(Base):
     type: str
 
 
+class FilmId(Base):
+    id: str
+
+
 class Film(Base):
     id: str
     title: str
@@ -35,7 +39,13 @@ class Film(Base):
 class Person(Base):
     id: str
     name: str
-    films: List[FilmForPerson]
+    films: Optional[List[FilmForPerson]]
+
+
+class PersonShort(Base):
+    id: str
+    name: str
+    films_ids: Optional[List[FilmId]]
 
 
 class Genre(Base):
