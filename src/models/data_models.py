@@ -16,14 +16,14 @@ class PersonForFilm(Base):
 class FilmForPerson(Base):
     id: str
     title: str
-    rating: float = None
+    rating: Optional[float]
     type: str
 
 
 class Film(Base):
     id: str
     title: str
-    rating: float = None
+    rating: Optional[float]
     type: str
     description: Optional[str] = ""
     genres: Optional[List[GenreForFilm]]
