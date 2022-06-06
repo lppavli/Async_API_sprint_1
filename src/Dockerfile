@@ -1,4 +1,4 @@
-FROM python:3.9-alpine3.12
+FROM python:3.9.12-alpine3.14
 
 RUN apk update \
     && apk add build-base
