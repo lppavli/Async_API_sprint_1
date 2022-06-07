@@ -112,10 +112,10 @@ class Load:
 def main():
     state = State(JsonFileStorage('state.json'))
     dsl = {
-        'dbname': os.getenv('DB_NAME', 'test'),
-        'user': os.getenv('DB_USER', 'user'),
-        'password': os.getenv('DB_PASSWORD', 'password'),
-        'host': os.getenv('DB_HOST', "host"),
+        'dbname': os.getenv('DB_NAME', 'movies_database'),
+        'user': os.getenv('DB_USER', 'app'),
+        'password': os.getenv('DB_PASSWORD', '123qwe'),
+        'host': os.getenv('DB_HOST', "localhost"),
         'port': os.getenv('DB_PORT', 5432),
     }
     queries = {'genres': GENRE_QUERY, 'persons': PERSON_QUERY, 'movies': FW_QUERY}

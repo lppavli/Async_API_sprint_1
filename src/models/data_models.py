@@ -32,6 +32,11 @@ class Film(Base):
     actors: Optional[List[PersonForFilm]]
 
 
+
+class FilmId(Base):
+    id: str
+
+
 class Person(Base):
     id: str
     name: str
@@ -42,3 +47,9 @@ class Genre(Base):
     id: str
     name: str
     description: Optional[str]
+
+
+class PersonShort(Base):
+    id: str
+    name: str
+    films_ids: Optional[List[FilmId]]

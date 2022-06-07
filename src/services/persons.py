@@ -1,36 +1,92 @@
 from functools import lru_cache
-from typing import Optional
+from typing import Optional, List
 
 from aioredis import Redis
 from elasticsearch import AsyncElasticsearch, NotFoundError
 from fastapi import Depends
+from pydantic import BaseModel
 
 from db.elastic import get_elastic
 from db.redis import get_redis
-from models.data_models import Person
+from models.data_models import Person, PersonShort
 
 PERSON_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 минут
+FILM_CACHE_EXPIRE_IN_SECONDS = 60*5
+
+
+class ListCache(BaseModel):
+    __root__: List[str]
 
 
 class PersonService:
     def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
-        # self.redis = redis
+        self.redis = redis
         self.elastic = elastic
 
-    # get_by_id возвращает объект фильма. Он опционален, так как фильм может отсутствовать в базе
     async def get_by_id(self, person_id: str) -> Optional[Person]:
-        # Пытаемся получить данные из кеша, потому что оно работает быстрее
         person = await self._person_from_cache(person_id)
         if not person:
-            # Если фильма нет в кеше, то ищем его в Elasticsearch
             person = await self._get_person_from_elastic(person_id)
             if not person:
-                # Если он отсутствует в Elasticsearch, значит, фильма вообще нет в базе
                 return None
-            # Сохраняем фильм  в кеш
             await self._put_person_to_cache(person)
+        return person
 
-        return  person
+    async def get_list(self, page_number: int, page_size: int) -> Optional[List[Person]]:
+        doc = await self.elastic.search(
+            index="persons",
+            from_=(page_number - 1) * page_size,
+            size=page_size
+        )
+        return [Person(**d["_source"]) for d in doc["hits"]["hits"]]
+
+    async def search(self, page_number: int, page_size: int, query: str) -> Optional[List[Person]]:
+        body = {
+                    "query": {
+                        "multi_match": {
+                            "query": query,
+                        }
+                    }
+                }
+        doc = await self.elastic.search(
+            index="persons", body=body,
+            from_=(page_number - 1) * page_size,
+            size=page_size
+        )
+        return [Person(**d["_source"]) for d in doc["hits"]["hits"]]
+
+    # async def search(self, query: str) -> List[Person]:
+    #     body = {
+    #         "query": {
+    #             "multi_match": {
+    #                 "query": query,
+    #             }
+    #         }
+    #     }
+    #     persons = await self._get_list_from_elastic(body)
+    #     #persons: List[Person] = await self._get_list_from_cache(query)
+    #
+    #     #if not persons:
+    #     #    persons = await self._get_list_from_elastic(body)
+    #     #    await self._put_list_to_cache(query, persons)
+    #
+    #     return persons
+
+    async def _get_list_from_cache(self, cache_key: str) -> Optional[List[Person]]:
+        data: str = await self.redis.get(cache_key)
+
+        if not data:
+            return None
+
+        data_list: ListCache = ListCache.parse_raw(data)
+        persons: list[Person] = [Person.parse_raw(p_data) for p_data in data_list.__root__]
+        return persons
+
+    async def _get_list_from_elastic(self, body: dict) -> List[Person]:
+        response = self.elastic.search(
+            index="persons", body=body,
+        )
+        return [Person(**d["_source"]) for d in response["hits"]["hits"]]
 
     async def _get_person_from_elastic(self, person_id: str) -> Optional[Person]:
         try:
@@ -40,23 +96,19 @@ class PersonService:
         return Person(**doc['_source'])
 
     async def _person_from_cache(self, person_id: str) -> Optional[Person]:
-        # Пытаемся получить данные о фильме из кеша, используя команду get
-        # https://redis.io/commands/get
-        data = None #await self.redis.get(person_id)
+        data = await self.redis.get(person_id)
         if not data:
             return None
-
-        # pydantic предоставляет удобное API для создания объекта моделей из json
         person = Person.parse_raw(data)
         return person
 
     async def _put_person_to_cache(self, person: Person):
-        pass
-        # Сохраняем данные о фильме, используя команду set
-        # Выставляем время жизни кеша — 5 минут
-        # https://redis.io/commands/set
-        # pydantic позволяет сериализовать модель в json
-        # await self.redis.set(person.id, person.json(), expire=PERSON_CACHE_EXPIRE_IN_SECONDS)
+        await self.redis.set(person.id, person.json(), expire=PERSON_CACHE_EXPIRE_IN_SECONDS)
+
+    async def _put_list_to_cache(self, cache_key: str, persons: List[Person]):
+        data = [f.json() for f in persons]
+        data_row = ListCache.parse_obj(data).json()
+        await self.redis.set(cache_key, data_row, expire=FILM_CACHE_EXPIRE_IN_SECONDS)
 
 
 @lru_cache()
