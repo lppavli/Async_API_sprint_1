@@ -2,9 +2,7 @@ from http import HTTPStatus
 from typing import Optional, List
 
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi_pagination import Page, paginate
-
-from models.data_models import Person, PersonShort, FilmId
+from models.data_models import PersonShort, FilmId
 from services.persons import PersonService, get_person_service
 
 router = APIRouter()
@@ -36,20 +34,6 @@ async def person_search(query: str, page_size: int, page_number: int,
     persons = await person_service.search(page_number, page_size, query)
     return [PersonShort(id=p.id, name=p.name, films_ids=[FilmId(id=f.id) for f in p.films]) for p in persons]
 
-# @router.get(
-#     '/search',
-#     response_model=Page[Person],
-# )
-# async def person_search(
-#         query: str, page_size: int, page_number: int,
-#         person_service: PersonService = Depends(get_person_service),
-# ):
-#     """
-#     Поиск по персонам
-#     """
-#     persons = await person_service.search(query)
-#
-#     return paginate(persons)
 
 @router.get('/{person_id}/film/')
 async def person_list_films(person_id: str, person_service: PersonService = Depends(get_person_service)) -> Optional[List]:

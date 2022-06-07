@@ -8,10 +8,10 @@ from pydantic import BaseModel
 
 from db.elastic import get_elastic
 from db.redis import get_redis
-from models.data_models import Person, PersonShort
+from models.data_models import Person
 
 PERSON_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 минут
-FILM_CACHE_EXPIRE_IN_SECONDS = 60*5
+FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5
 
 
 class ListCache(BaseModel):
@@ -42,35 +42,22 @@ class PersonService:
 
     async def search(self, page_number: int, page_size: int, query: str) -> Optional[List[Person]]:
         body = {
-                    "query": {
-                        "multi_match": {
-                            "query": query,
-                        }
-                    }
+            "query": {
+                "multi_match": {
+                    "query": query,
                 }
-        doc = await self.elastic.search(
-            index="persons", body=body,
-            from_=(page_number - 1) * page_size,
-            size=page_size
-        )
-        return [Person(**d["_source"]) for d in doc["hits"]["hits"]]
-
-    # async def search(self, query: str) -> List[Person]:
-    #     body = {
-    #         "query": {
-    #             "multi_match": {
-    #                 "query": query,
-    #             }
-    #         }
-    #     }
-    #     persons = await self._get_list_from_elastic(body)
-    #     #persons: List[Person] = await self._get_list_from_cache(query)
-    #
-    #     #if not persons:
-    #     #    persons = await self._get_list_from_elastic(body)
-    #     #    await self._put_list_to_cache(query, persons)
-    #
-    #     return persons
+            }
+        }
+        persons: List[Person] = await self._get_list_from_cache(query)
+        if not persons:
+            doc = await self.elastic.search(
+                index="persons", body=body,
+                from_=(page_number - 1) * page_size,
+                size=page_size
+            )
+            persons = [Person(**d["_source"]) for d in doc["hits"]["hits"]]
+            await self._put_list_to_cache(query, persons)
+        return persons
 
     async def _get_list_from_cache(self, cache_key: str) -> Optional[List[Person]]:
         data: str = await self.redis.get(cache_key)
