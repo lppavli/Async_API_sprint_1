@@ -1,3 +1,4 @@
+import logging
 import aioredis
 import uvicorn
 from elasticsearch import AsyncElasticsearch
@@ -24,6 +25,7 @@ async def startup():
     elastic.es = AsyncElasticsearch(
         hosts=[f"{settings.ELASTIC_HOST}:{settings.ELASTIC_PORT}"]
     )
+    logging.info('Service up')
 
 
 @app.on_event("shutdown")
