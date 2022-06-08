@@ -50,4 +50,16 @@ services:
       - elastic
       - etl
 
+  nginx:
+    image: nginx:1.19.2
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/configs:/etc/nginx/conf.d:ro
+      - static:/data/static/
+    depends_on:
+      - async_api
+    ports:
+      - "80:80"
 
+volumes:
+  static:
