@@ -1,4 +1,5 @@
 #Проект Асинхронное API
+https://github.com/lppavli/Async_API_sprint_1
 ## Используемые технологии
 - Код приложения пишется на Python + FastAPI.
 - Приложение запускается под управлением сервера ASGI(uvicorn).
