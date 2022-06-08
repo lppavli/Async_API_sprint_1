@@ -34,40 +34,23 @@ class FilmService:
         return film
 
     async def get_all_films(
-            self,
-            sort: Optional[str],
-            filter: Optional[str],
+        self,
+        sort: Optional[str],
+        filter: Optional[str],
     ) -> list[FilmForPerson]:
 
-        body = {
-            "query": {
-                "bool": {
-                    "must": {
-                        "match_all": {}
-                    }
-                }
-            }
-        }
+        body = {"query": {"bool": {"must": {"match_all": {}}}}}
 
         if sort:
-            body['sort'] = [
-                {
-                    f"{sort}": "desc"
-                },
-                "_score"
-            ]
+            body["sort"] = [{f"{sort}": "desc"}, "_score"]
 
         if filter:
-            body['query']['bool']['filter'] = {
-                "match": {
-                    "genres.name": f"{filter}"
-                }
-            }
+            body["query"]["bool"]["filter"] = {"match": {"genres.name": f"{filter}"}}
 
-        cache_key = f'{sort}{filter}'
+        cache_key = f"{sort}{filter}"
 
         if not cache_key:
-            cache_key = 'all_films'
+            cache_key = "all_films"
 
         films: Optional[list[FilmForPerson]] = await self._films_from_cache(cache_key)
 
@@ -88,8 +71,8 @@ class FilmService:
                         "writers_names",
                         "title",
                         "description",
-                        "genre"
-                    ]
+                        "genre",
+                    ],
                 }
             }
         }
@@ -105,21 +88,21 @@ class FilmService:
     async def _search_films(self, body: dict) -> list[FilmForPerson]:
 
         response = await self.elastic.search(
-            index='movies',
+            index="movies",
             body=body,
         )
         return self._convert_to_model(response)
 
     @staticmethod
     def _convert_to_model(response: dict) -> list[FilmForPerson]:
-        return [FilmForPerson(**d['_source']) for d in response['hits']['hits']]
+        return [FilmForPerson(**d["_source"]) for d in response["hits"]["hits"]]
 
     async def _get_film_from_elastic(self, film_id: str) -> Optional[Film]:
         try:
-            doc = await self.elastic.get('movies', film_id)
+            doc = await self.elastic.get("movies", film_id)
         except NotFoundError:
             return None
-        return Film(**doc['_source'])
+        return Film(**doc["_source"])
 
     async def _film_from_cache(self, film_id: str) -> Optional[Film]:
         data = await self.redis.get(film_id)
@@ -135,7 +118,9 @@ class FilmService:
             return None
 
         data_list: ListCache = ListCache.parse_raw(data)
-        films: list[FilmForPerson] = [FilmForPerson.parse_raw(film_data) for film_data in data_list.__root__]
+        films: list[FilmForPerson] = [
+            FilmForPerson.parse_raw(film_data) for film_data in data_list.__root__
+        ]
         return films
 
     async def _put_film_to_cache(self, film: Film):
@@ -149,7 +134,7 @@ class FilmService:
 
 @lru_cache()
 def get_film_service(
-        redis: Redis = Depends(get_redis),
-        elastic: AsyncElasticsearch = Depends(get_elastic),
+    redis: Redis = Depends(get_redis),
+    elastic: AsyncElasticsearch = Depends(get_elastic),
 ) -> FilmService:
     return FilmService(redis, elastic)

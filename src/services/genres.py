@@ -28,17 +28,16 @@ class GenreService:
 
     async def get_list(self, page_number: int, page_size: int):
         doc = await self.elastic.search(
-            index="genres", from_=(page_number - 1) * page_size,
-            size=page_size
+            index="genres", from_=(page_number - 1) * page_size, size=page_size
         )
         return [Genre(**d["_source"]) for d in doc["hits"]["hits"]]
 
     async def _get_genre_from_elastic(self, genre_id: str) -> Optional[Genre]:
         try:
-            doc = await self.elastic.get('genres', genre_id)
+            doc = await self.elastic.get("genres", genre_id)
         except NotFoundError:
             return None
-        return Genre(**doc['_source'])
+        return Genre(**doc["_source"])
 
     async def _genre_from_cache(self, genre_id: str) -> Optional[Genre]:
         data = await self.redis.get(genre_id)
@@ -48,12 +47,14 @@ class GenreService:
         return genre
 
     async def _put_genre_to_cache(self, genre: Genre):
-        await self.redis.set(genre.id, genre.json(), expire=GENRE_CACHE_EXPIRE_IN_SECONDS)
+        await self.redis.set(
+            genre.id, genre.json(), expire=GENRE_CACHE_EXPIRE_IN_SECONDS
+        )
 
 
 @lru_cache()
 def get_genre_service(
-        redis: Redis = Depends(get_redis),
-        elastic: AsyncElasticsearch = Depends(get_elastic),
+    redis: Redis = Depends(get_redis),
+    elastic: AsyncElasticsearch = Depends(get_elastic),
 ) -> GenreService:
     return GenreService(redis, elastic)

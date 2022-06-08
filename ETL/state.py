@@ -21,16 +21,16 @@ class JsonFileStorage(BaseStorage):
 
     def save_state(self, state: dict) -> None:
         if self.file_path is None:
-            raise Exception('File not found')
+            raise Exception("File not found")
 
-        with open(self.file_path, 'w') as f:
+        with open(self.file_path, "w") as f:
             json.dump(state, f)
 
     def retrieve_state(self) -> dict:
         if self.file_path is None:
             return {}
         try:
-            with open(self.file_path, 'r') as f:
+            with open(self.file_path, "r") as f:
                 data = json.load(f)
             return data
         except FileNotFoundError:
@@ -40,10 +40,10 @@ class JsonFileStorage(BaseStorage):
 
 class State:
     """
-        Класс для хранения состояния при работе с данным, чтобы постоянно не перечитывать данные с начала.
-        Здесь представлена реализация с сохранением состояния в файл.
-        В целом ничего не мешает поменять это поведение на работу с БД или распределенным хранилищем.
-        """
+    Класс для хранения состояния при работе с данным, чтобы постоянно не перечитывать данные с начала.
+    Здесь представлена реализация с сохранением состояния в файл.
+    В целом ничего не мешает поменять это поведение на работу с БД или распределенным хранилищем.
+    """
 
     def __init__(self, storage: BaseStorage):
         self.storage = storage
