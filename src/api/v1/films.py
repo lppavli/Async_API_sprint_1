@@ -1,5 +1,4 @@
 import enum
-import uuid
 from http import HTTPStatus
 from typing import Optional
 
@@ -15,12 +14,11 @@ router = APIRouter()
 
 
 @router.get(
-    '/search',
-    response_model=Page[FilmForPerson],
+    "/search", response_model=Page[FilmForPerson], description="Поиск по фильмам"
 )
 async def films_search(
-        query: str,
-        film_service: FilmService = Depends(get_film_service),
+    query: str,
+    film_service: FilmService = Depends(get_film_service),
 ):
     """
     Поиск по фильмам
@@ -30,14 +28,13 @@ async def films_search(
     return paginate(films)
 
 
-@router.get('/{film_id}', response_model=Film)
+@router.get("/{film_id}", response_model=Film, description="Вывод информации о фильме")
 async def film_details(
-        film_id: str,
-        film_service: FilmService = Depends(get_film_service)
+    film_id: str, film_service: FilmService = Depends(get_film_service)
 ) -> Film:
     film = await film_service.get_by_id(film_id)
     if not film:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='film not found')
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="film not found")
 
     return film
 
@@ -48,11 +45,11 @@ class EnumStrMixin(enum.Enum):
 
 
 class SortTypes(EnumStrMixin):
-    rating = 'rating'
+    rating = "rating"
 
 
 class FilterGenres(EnumStrMixin):
-    animation = 'Animation'
+    animation = "Animation"
     action = "Action"
     adventure = "Adventure"
     fantasy = "Fantasy"
@@ -80,29 +77,22 @@ class FilterGenres(EnumStrMixin):
     news = "News"
 
 
-@router.get(
-    '/',
-    response_model=Page[FilmForPerson],
-)
+@router.get("/", response_model=Page[FilmForPerson], description="Вывод всех фильмов")
 async def get_all_films(
-        sort: Optional[SortTypes] = None,
-        filter: Optional[FilterGenres] = None,
-        film_service: FilmService = Depends(get_film_service),
+    sort: Optional[SortTypes] = None,
+    filter: Optional[FilterGenres] = None,
+    film_service: FilmService = Depends(get_film_service),
 ) -> Page[list[Film]]:
 
     if not sort:
-        sort = ''
+        sort = ""
 
     if not filter:
-        filter = ''
+        filter = ""
 
     films = await film_service.get_all_films(sort, filter)
 
     return paginate(films)
 
+
 add_pagination(router)
-
-
-
-
-

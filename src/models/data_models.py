@@ -32,7 +32,6 @@ class Film(Base):
     actors: Optional[List[PersonForFilm]]
 
 
-
 class FilmId(Base):
     id: str
 
